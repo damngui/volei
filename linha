@@ -1,0 +1,30 @@
+-- ServerScript: put in ServerScriptService
+-- Shows a beam for every player pointing in the direction their HumanoidRootPart is looking.
+-- Creates an invisible anchored Part to host Attachment1 (Attachments must be inside BaseParts).
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local LINE_DISTANCE = 20 -- length of the line
+local LINE_WIDTH = 0.1
+
+-- Store connections / cleanup per character
+local characterData = {} -- [character] = {heartbeatConn = conn, endPart = part}
+
+local function cleanupCharacter(character)
+    local data = characterData[character]
+    if not data then return end
+    if data.heartbeatConn then
+        data.heartbeatConn:Disconnect()
+    end
+    if data.endPart and data.endPart.Parent then
+        data.endPart:Destroy()
+    end
+    characterData[character] = nil
+end
+
+local function createLookLine(character)
+    local hrp = character:WaitForChild("HumanoidRootPart", 5)
+    if not hrp then return end
+
+    -- Attach
